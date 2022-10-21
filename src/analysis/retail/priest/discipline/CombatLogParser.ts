@@ -48,7 +48,7 @@ import PowerWordShield from './modules/spells/PowerWordShield';
 import AegisOfWrath from './modules/spells/AegisOfWrath';
 import CrystallineReflection from './modules/spells/CrystallineReflection';
 import StolenPsyche from './modules/spells/StolenPsyche';
-import PowerWordRadiance from './modules/spells/PowerWordRadiance';
+import MaliciousIntent from './modules/spells/MaliciousIntent';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -109,6 +109,7 @@ class CombatLogParser extends CoreCombatLogParser {
     powerWordShield: PowerWordShield,
     stolenPsyche: StolenPsyche,
     twinsOfTheSunPriestess: TwinsOfTheSunPriestess,
+    maliciousIntent: MaliciousIntent,
   };
 }
 
