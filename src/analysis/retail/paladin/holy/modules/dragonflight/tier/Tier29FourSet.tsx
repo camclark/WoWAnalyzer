@@ -1,6 +1,5 @@
 import { formatDuration } from 'common/format';
 import SPELLS from 'common/SPELLS';
-import Spell from 'common/SPELLS/Spell';
 import TALENTS from 'common/TALENTS/paladin';
 import SpellIcon from 'interface/SpellIcon';
 import SpellLink from 'interface/SpellLink';
@@ -18,15 +17,14 @@ import STATISTIC_ORDER from 'parser/ui/STATISTIC_ORDER';
 // Lightspark: Holy Light, Flash of Light, Light of Dawn, Word of Glory, and Bestow Faith healing is increased by 6% and their critical effects
 // increase the damage or healing of your next Holy Shock by 20%.
 
-// Module is tracking effective use of lightspark, encouraging use of Holy Shock on cooldown
-// Escpially when empowered by lightspark...
+// Module is encouraging use of Holy Shock on cooldown when empowered by lightspark
 
 class Tier29FourSet extends Analyzer {
   static dependencies = {
     spellUsable: SpellUsable,
   };
-  lightsparkEffectivelyUsed: number = 0;
-  lightsparkNotEffectivelyUsed: number = 0;
+  lightsparkConsumedCount: number = 0;
+  lightsparkConsumptionMissCount: number = 0;
   protected spellUsable!: SpellUsable;
 
   constructor(options: Options) {
@@ -36,50 +34,62 @@ class Tier29FourSet extends Analyzer {
       return;
     }
 
-    // Lightspark: Holy Light, Flash of Light, Light of Dawn, Word of Glory, and Bestow Faith healing is increased by 6% and their critical effects
-
     if (this.selectedCombatant.hasTalent(TALENTS.HOLY_LIGHT_TALENT.id)) {
       this.addEventListener(
         Events.heal.spell(TALENTS.HOLY_LIGHT_TALENT).by(SELECTED_PLAYER),
-        this.checkLightSparkUsed
+        this.checklightsparkConsumptionMiss,
       );
     }
 
     this.addEventListener(
       Events.heal.spell(SPELLS.FLASH_OF_LIGHT).by(SELECTED_PLAYER),
-      this.checkLightSparkUsed,
+      this.checklightsparkConsumptionMiss,
     );
 
     this.addEventListener(
       Events.heal.spell(SPELLS.LIGHT_OF_DAWN_HEAL).by(SELECTED_PLAYER),
-      this.checkLightSparkUsed,
+      this.checklightsparkConsumptionMiss,
     );
 
     this.addEventListener(
       Events.heal.spell(SPELLS.WORD_OF_GLORY).by(SELECTED_PLAYER),
-      this.checkLightSparkUsed,
+      this.checklightsparkConsumptionMiss,
     );
 
     if (this.selectedCombatant.hasTalent(TALENTS.BESTOW_FAITH_TALENT.id)) {
       this.addEventListener(
         Events.heal.spell(TALENTS.BESTOW_FAITH_TALENT).by(SELECTED_PLAYER),
-        this.checkLightSparkUsed
+        this.checklightsparkConsumptionMiss,
+      );
+    }
+
+    if (this.selectedCombatant.hasTalent(TALENTS.LIGHT_OF_THE_MARTYR_TALENT.id)) {
+      this.addEventListener(
+        Events.heal.spell(TALENTS.LIGHT_OF_THE_MARTYR_TALENT).by(SELECTED_PLAYER),
+        this.checklightsparkConsumptionMiss,
+      );
+    }
+
+    if (this.selectedCombatant.hasTalent(TALENTS.HOLY_SHOCK_TALENT.id)) {
+      this.addEventListener(
+        Events.cast.spell(TALENTS.HOLY_SHOCK_TALENT).by(SELECTED_PLAYER),
+        this.checklightsparkConsumption,
       );
     }
   }
 
-  // Lightspark: Holy Light, Flash of Light, Light of Dawn, Word of Glory, and Bestow Faith healing is increased by 6% and their critical effects
-
-  checkLightSparkUsed(event: HealEvent) {
-    if (this.spellUsable.chargesAvailable(SPELLS.LIGHTSPARK.id)
-    && this.spellUsable.isAvailable(TALENTS.HOLY_SHOCK_TALENT.id)) {
-      this.lightsparkNotEffectivelyUsed
+  checklightsparkConsumptionMiss(event: HealEvent) {
+    if (
+      this.spellUsable.chargesAvailable(SPELLS.LIGHTSPARK.id) &&
+      this.spellUsable.isAvailable(TALENTS.HOLY_SHOCK_TALENT.id)
+    ) {
+      this.lightsparkConsumptionMissCount += 1;
     }
   }
 
-  holyShockCast(event: CastEvent) {
+  checklightsparkConsumption(event: CastEvent) {
     if (this.spellUsable.chargesAvailable(SPELLS.LIGHTSPARK.id)) {
-      this.lightsparkEffectivelyUsed
+      this.lightsparkConsumedCount += 1;
     }
   }
 
@@ -91,9 +101,14 @@ class Tier29FourSet extends Analyzer {
         category={STATISTIC_CATEGORY.ITEMS}
         tooltip={
           <>
-            Effective Cooldown Reduction: {formatDuration(this.lightsparkEffectivelyUsed)}
+            Total <SpellLink id={SPELLS.LIGHTSPARK.id} /> use count:{' '}
+            {formatDuration(this.lightsparkConsumedCount)}
             <br />
-            Wasted Cooldown Reduction: {formatDuration(this.lightsparkNotEffectivelyUsed)}
+            Count of healing spells used instead of <SpellLink
+              id={TALENTS.HOLY_SHOCK_TALENT.id}
+            />{' '}
+            when <SpellLink id={SPELLS.LIGHTSPARK.id} /> is active:{' '}
+            {formatDuration(this.lightsparkConsumptionMissCount)}
           </>
         }
       >
@@ -105,7 +120,7 @@ class Tier29FourSet extends Analyzer {
             </>
           }
         >
-          <>{formatDuration(this.lightsparkEffectivelyUsed / (this.holyShockCasts + 1))}</>
+          <>{formatDuration(this.lightsparkConsumedCount)}</>
         </BoringValueText>
       </Statistic>
     );

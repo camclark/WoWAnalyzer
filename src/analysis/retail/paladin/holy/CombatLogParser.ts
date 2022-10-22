@@ -46,6 +46,7 @@ import JudgmentOfLight from './modules/talents/JudgmentOfLight';
 import RuleOfLaw from './modules/talents/RuleOfLaw';
 import BeaconOfVirtueNormalizer from './normalizers/BeaconOfVirtue';
 import LightOfDawnNormalizer from './normalizers/LightOfDawn';
+import Tier29FourSet from './modules/dragonflight/tier/Tier29FourSet';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -107,10 +108,10 @@ class CombatLogParser extends CoreCombatLogParser {
     holyPowerDetails: HolyPowerDetails,
     holyPowerPerMinute: HolyPowerPerMinute,
 
-    //-- shadowlands section --//
+    //-- Dragonflight section --//
 
     // Tier Sets
-    // TODO: Add Tier 29
+    Tier29FourSet: Tier29FourSet,
   };
 }
 

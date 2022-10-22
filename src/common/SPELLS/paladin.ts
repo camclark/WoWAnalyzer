@@ -463,6 +463,13 @@ const spells = spellIndexableList({
     name: 'Glorious Purpose',
     icon: 'spell_holy_holyprotection',
   },
+
+  // T29
+  LIGHTSPARK: {
+    id: 394667,
+    name: 'Lightspark',
+    icon: 'inv_enchant_shardbrilliantsmall',
+  },
 });
 
 export default spells;
